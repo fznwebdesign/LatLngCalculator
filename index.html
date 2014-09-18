@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Lat/Lng Calculator (Google Maps Services)</title>
+		<link href="css/style.css" media="all" rel="stylesheet" type="text/css">
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+		<script type="text/javascript" src="js/UI.js"></script>
+		<script type="text/javascript" src="js/GoogleMaps_GetLatLng.js"></script>
+	</head>
+	<body>
+		<section class="header">
+			<h1>Lat/Lng Calculator (Google Maps Services)</h1>
+			<p>Get the Lat/Lng position of an entire Address List with Google Maps Javascript API Services</p>
+			<p>All you need is to save your List of Address in Excel as CSV (Comma delimited) and your <a href="https://code.google.com/apis/console/" target="_blank">API Key</a>!</p>
+			<p>Note: Latest version of Chrome recommended</p>
+		</section>
+		<section id="step1">
+			<h2><span>Step 1</span> Enter your Google Maps API Key:</h2>
+			<input id="APIKey" value="AIzaSyC57e3u7AfLoX1KlRF8TtP1ICWhlP2XExo" type="text" />
+			<input id="APIKeyBtn" type="button" value="Use" />
+		</section>
+		<section id="step2" style="display:none">
+			<h2><span>Step 2</span> Load your CSV or JSON file:</h2>
+			<form id="dataFileForm" name="dataFileForm">
+				<input id="dataFile" name="dataFile" value="" type="file" />
+			</form>
+		</section>
+		<section id="step3" style="display:none">
+			<h2><span>Step 3</span> Select which fields correspond to the Address:</h2>
+			<form id="selectFields" name="selectFields"></form>
+			<input id="selectFieldsBtn" type="button" value="Go For It!" />
+		</section>
+		<section id="step4" style="display:none">
+			<h2><span>Step 4</span> Wait for your request to be completed</h2>
+		</section>
+		<section id="step5" style="display:none">
+			<h2><span>Step 5</span> Download your file</h2>
+			<div id="downloadContainer"></div>
+		</section>
+	</body>
+</html>
