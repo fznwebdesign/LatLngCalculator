@@ -57,7 +57,6 @@ var GetLatLng = {
 				cItemAdd += ", ";
 			}
 		}
-		console.log(cItemAdd,cItem,aCols)
 		geocoder.geocode( { 'address': cItemAdd}, function(results, status) {
 			self.acc.splice(0,1);
 			if (status == google.maps.GeocoderStatus.OK) {
@@ -102,22 +101,3 @@ var GetLatLng = {
 		UI.onFinalize(oMyBlob);
 	}
 }
-
-/**** Example Data ****/
-
-var exampleData = [
-  {
-    "Place Name":"Softtek Aguascalientes",
-    "Address":"Eugenio Garza Sada, Aguascalientes, Aguascalientes",
-    "Country":"Mexico"
-  },
-  {
-    "Place Name":"Pedro's House",
-    "Address":"Canal Interceptor, Aguascalientes, Aguascalientes",
-    "Country":"Mexico",
-  }
-]
-
-/**** Script Starters ****/
-
-//GetLatLng.start(TestData);
