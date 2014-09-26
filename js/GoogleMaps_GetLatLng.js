@@ -73,7 +73,7 @@ var GetLatLng = {
 				self.accReady.push(cItem);
 				
 				if(self.accReady.length % 100 == 0){
-					UI.console.innerHTML = "In order to avoid several 'OVER_QUERY_LIMIT' responses, the script will wait a few seconds to cool down the Google Service <br />Please be patient";
+					UI.console.innerHTML = "Reloading Google Service";
 					
 					if(self.acc.length >= 1){
 						UI.googleMapsLoad("GetLatLng.getLatLng");
