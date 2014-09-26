@@ -15,6 +15,9 @@ var UI = {
 			UI.console = document.createElement("section");
 			UI.console.id = "status";
 			document.body.appendChild(UI.console);
+			UI.print = document.createElement("section");
+			UI.print.id = "print";
+			document.body.appendChild(UI.print);
 		}
 		keyBtn.onclick = function(){
 			key = keyInput.value || false;
@@ -68,12 +71,13 @@ var UI = {
 			GetLatLng.start(UI.data);
 		}
 	},
-	googleMapsLoad:function(){
+	googleMapsLoad:function(callback){
 		var k = UI.APIKey || false,
-			keyInput = document.getElementById("APIKey"),
-			keyBtn = document.getElementById("APIKeyBtn");
+			keyInput = document.getElementById("APIKey") || {},
+			keyBtn = document.getElementById("APIKeyBtn") || {},
+			callback = callback || "UI.googleMapsOnLoad";
 		if(k){
-			$.getScript( "http://maps.googleapis.com/maps/api/js?key=" + k + "&callback=UI.googleMapsOnLoad").fail(function(){
+			$.getScript( "http://maps.googleapis.com/maps/api/js?key=" + k + "&callback=" + callback).fail(function(){
 				keyInput.disabled = false;
 				keyBtn.disabled = false;
 				alert("Error Loading Google Maps, Please try again");
@@ -116,7 +120,7 @@ var UI = {
 			link = document.createElement("a");
 		step4.style.display = "none";
 		step5.style.display = "block";
-		UI.console.innerHTML = "Completed!"
+		//UI.console.innerHTML = "Completed!"
 		link.href = window.URL.createObjectURL(blob);
 		link.download = "ResultsWithLatLng.csv";
 		link.id = "downloadFile";
@@ -126,22 +130,51 @@ var UI = {
 	csvJSON: function(csv){
 		var lines = csv.split("\n"),
 			result = [],
-			headers = lines[0].split(","),
+			h = "",
 			val,
 			obj,currentline,i,j,len,len2;
-		for(i = 0, len = headers.length; i < len; i++){
-			headers[i] = headers[i].replace(/[^a-z0-9, &]/gmi, "");
-		}
+		this.headers = this.sanitizeLine(lines[0],true);
 		for(i = 1, len = lines.length; i < len; i++){
 			obj = {};
-			currentline = lines[i].split(",");
-			for(j = 0, len2 = headers.length; j < len2; j++){
-				obj[headers[j]] = currentline[j];
+			currentline = this.sanitizeLine(lines[i]);
+			if(currentline.length > 0){
+				for(j = 0, len2 = this.headers.length; j < len2; j++){
+					h = this.headers[j];
+					obj[h] = currentline[j];
+				}
+				result.push(obj);
 			}
-			result.push(obj);
 		}
-		this.headers = headers;
 		return result;
+	},
+	sanitizeLine: function(line,ignoreBlanks){
+		var q = 0,
+			c = 0,
+			end = 0,
+			start = 0,
+			hasQuotes = false,
+			s = "",
+			res = [],
+			ignore = ignoreBlanks || false
+			count = 0;
+		if(line.length == 0){
+			return [];
+		}
+		line += ","
+		line = line.replace(/[\n\r]/g,"");
+		while(line.length > 0){
+			q = line.indexOf('"');
+			c = line.indexOf(',');
+			hasQuotes = (q >= 0 && q < c) ? true : false;
+			end =(hasQuotes) ? line.indexOf('"',q + 2) : line.indexOf(',');
+			start = (hasQuotes) ? 1 : 0;
+			s = line.substring(start,end);
+			if(!ignore || s != ""){
+				res.push(s);
+			}
+			line = line.substring(end + 1 + start);
+		}
+		return res;
 	},
 	getAddressColums: function(){
 		var el = document.getElementById("selectFields"),
