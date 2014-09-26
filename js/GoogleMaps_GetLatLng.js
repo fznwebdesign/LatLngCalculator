@@ -22,13 +22,13 @@ var GetLatLng = {
 			len,
 			end,
 			field,
-			print = (this.output=="CSV") ? "" : "{";
+			print = (this.output=="CSV") ? '' : "{";
 		
 		for(i = 0, len = this.printFields.length; i < len; i++){
-			end = (i!=(len-1)) ? ',' : '',
+			end = (i!=(len-1)) ? '",' : '"',
 			field = this.printFields[i];
 			
-			print += '';
+			print += '"';
 			if(this.output!="CSV"){
 				print += field + '":"' 
 			}
@@ -58,26 +58,39 @@ var GetLatLng = {
 			}
 		}
 		geocoder.geocode( { 'address': cItemAdd}, function(results, status) {
-			self.acc.splice(0,1);
-			if (status == google.maps.GeocoderStatus.OK) {
-				cItem.Latitude = results[0].geometry.location.lat();
-				cItem.Longitude = results[0].geometry.location.lng();
-			} else {
-				cItem.Latitude = status;
-				cItem.Longitude = status;
-			}
-			self.print(cItem);
-			self.accReady.push(cItem);
-		
-			UI.console.innerHTML = "Processed: " + self.accReady.length + " of " + (self.acc.length + self.accReady.length);
-			
-			if(self.acc.length>=1){
-				setTimeout(function(){GetLatLng.getLatLng();},1000);
-			}else{
-				if(self.output != "CSV"){
-					self.tBody += "\n ]";
+			if (status != google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
+				var lat,lng,cooldown;
+				self.acc.splice(0,1);
+				if(status == google.maps.GeocoderStatus.OK){
+					cItem.Latitude = results[0].geometry.location.lat();
+					cItem.Longitude = results[0].geometry.location.lng();
+				}else{
+					cItem.Latitude = status;
+					cItem.Longitude = status;
 				}
-				self.finalize();
+				
+				self.print(cItem);
+				self.accReady.push(cItem);
+				
+				if(self.accReady.length % 100 == 0){
+					UI.console.innerHTML = "In order to avoid several 'OVER_QUERY_LIMIT' responses, the script will wait a few seconds to cool down the Google Service <br />Please be patient";
+					
+					if(self.acc.length >= 1){
+						UI.googleMapsLoad("GetLatLng.getLatLng");
+					}else{
+						self.finalize();
+					}
+				}else{
+					UI.console.innerHTML = "Processed: " + self.accReady.length + " of " + (self.acc.length + self.accReady.length);
+				
+					if(self.acc.length >= 1){
+						setTimeout(function(){GetLatLng.getLatLng()},1000);
+					}else{
+						self.finalize();
+					}
+				}
+			} else {
+				setTimeout(function(){GetLatLng.getLatLng();},1000);
 			}
 		});
 	},
@@ -97,7 +110,11 @@ var GetLatLng = {
 		this.getLatLng();
 	},
 	finalize: function(){
-		var oMyBlob = new Blob([this.tBody], {type : 'text/vnd.ms-excel'}); 
-		UI.onFinalize(oMyBlob);
+		var b = null; 
+		if(self.output != "CSV"){
+			self.tBody += "\n ]";
+		}
+		b = new Blob([this.tBody], {type : 'text/vnd.ms-excel;charset=UTF-8'});
+		UI.onFinalize(b);
 	}
 }
