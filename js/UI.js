@@ -1,5 +1,4 @@
 var UI = {
-	APIKey: "",
 	dataFile: "",
 	dataType: "",
 	data: null,
@@ -10,24 +9,32 @@ var UI = {
 		var keyInput = document.getElementById("APIKey"),
 			keyBtn = document.getElementById("APIKeyBtn"),
 			dataFile = document.getElementById("dataFile"),
+			isValid = this.validateBrowser(),
 			key,file;
+		if(!isValid){
+			document.getElementById("welcomeMessage").innerHTML = "<p>Sorry, your browser doesn't support all the required features, we strongly recommend to use the latest version of Chrome.</p>";
+			document.getElementById("step1").style.display = "none";
+			document.getElementById("status").style.display = "none";
+			return false;
+		}
 		if(!UI.console){
 			UI.console = document.createElement("section");
 			UI.console.id = "status";
 			document.body.appendChild(UI.console);
-			UI.print = document.createElement("section");
-			UI.print.id = "print";
-			document.body.appendChild(UI.print);
 		}
 		keyBtn.onclick = function(){
 			key = keyInput.value || false;
 			if(key){
-				UI.APIKey = key;
+				GetLatLng.APIKey = key;
 				UI.console.innerHTML = "";
 				keyInput.value = "";
 				keyInput.disabled = "disabled";
 				keyBtn.disabled = "disabled";
-				UI.googleMapsLoad();
+				GetLatLng.googleMapsLoad("UI.googleMapsOnLoad",function(){
+					document.getElementById("APIKey").disabled = false;
+					document.getElementById("APIKeyBtn").disabled = false;
+					alert("Error Loading Google Maps, Please try again");
+				});
 			}else{
 				UI.console.innerHTML = "Please enter a key";
 			}
@@ -40,7 +47,7 @@ var UI = {
 				UI.dataFile = file;
 				r = new FileReader();
 				r.onload = UI.fileOnLoad;
-				r.readAsText(file);
+				r.readAsText(file, 'ISO-8859-1');
 			}else{
 				UI.console.innerHTML = "Please select a file to load";
 			}
@@ -68,20 +75,8 @@ var UI = {
 			step3.style.display = "none";
 			step4.style.display = "block";
 			UI.addressCols = res;
-			GetLatLng.start(UI.data);
-		}
-	},
-	googleMapsLoad:function(callback){
-		var k = UI.APIKey || false,
-			keyInput = document.getElementById("APIKey") || {},
-			keyBtn = document.getElementById("APIKeyBtn") || {},
-			callback = callback || "UI.googleMapsOnLoad";
-		if(k){
-			$.getScript( "http://maps.googleapis.com/maps/api/js?key=" + k + "&callback=" + callback).fail(function(){
-				keyInput.disabled = false;
-				keyBtn.disabled = false;
-				alert("Error Loading Google Maps, Please try again");
-			});
+			GetLatLng.onEnd = function(r){UI.onFinalize(r)};
+			GetLatLng.start(UI.data,UI.headers,UI.addressCols,UI.console);
 		}
 	},
 	googleMapsOnLoad: function(){
@@ -113,14 +108,15 @@ var UI = {
 				UI.console.innerHTML = "Please select a CSV file";
 		}
 	},
-	onFinalize: function(blob){
+	onFinalize: function(res){
 		var step4 = document.getElementById("step4"),
 			step5 = document.getElementById("step5"),
 			target = document.getElementById('downloadContainer')
-			link = document.createElement("a");
+			link = document.createElement("a"),
+			blob = new Blob(["\ufeff",res], {type : 'text/vnd.ms-excel;charset=UTF-8', encoding:"UTF-8"});
 		step4.style.display = "none";
 		step5.style.display = "block";
-		//UI.console.innerHTML = "Completed!"
+		UI.console.innerHTML = "Completed!";
 		link.href = window.URL.createObjectURL(blob);
 		link.download = "ResultsWithLatLng.csv";
 		link.id = "downloadFile";
@@ -186,6 +182,13 @@ var UI = {
 			html += "<label><input name='selectedFields' type='checkbox' value='" + this.headers[i] + "' /><span>" +this.headers[i] + "</span></label>"
 		}
 		el.innerHTML = html;
+	},
+	validateBrowser: function(){
+		f = (typeof FileReader == "function") ? true : false,
+		b = (typeof Blob == "function") ? true : false,
+		url = window.URL || false,
+		c = url.createObjectURL || false;
+		return (f && b && c);
 	}
 }
 window.onload = function(){
