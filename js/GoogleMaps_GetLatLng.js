@@ -6,15 +6,18 @@
 var GetLatLng = {
 	/**** Generate Random Address ****/
 	output : "CSV", // "CSV" of "JSON"
+	console : null,
+	callback : null,
+	APIKey : null,
 	tBody : "", // jQuery target to print the results
 	printFields : [ // The fields that will be printed
-				"Address",
-				"Country"
+		"Address",
+		"Country"
 	],
+	addressCols : [],
 	accReady : [],
 	accFailed : [],
 	acc : [],
-	debug:true,
 		
 	/**** Output Functions ****/
 	print : function (item){
@@ -48,11 +51,10 @@ var GetLatLng = {
 			cItem,
 			cItemAdd = "",
 			self = this,
-			aCols = UI.addressCols || ["Address"],
 			i,len;
 		cItem = this.acc[0];
-		for(i = 0, len = aCols.length; i < len; i++){
-			cItemAdd += cItem[aCols[i]];
+		for(i = 0, len = this.addressCols.length; i < len; i++){
+			cItemAdd += cItem[this.addressCols[i]];
 			if(i != len - 1){
 				cItemAdd += ", ";
 			}
@@ -73,15 +75,15 @@ var GetLatLng = {
 				self.accReady.push(cItem);
 				
 				if(self.accReady.length % 100 == 0){
-					UI.console.innerHTML = "Reloading Google Service";
+					self.console.innerHTML = "Reloading Google Service";
 					
 					if(self.acc.length >= 1){
-						UI.googleMapsLoad("GetLatLng.getLatLng");
+						self.googleMapsLoad("GetLatLng.getLatLng");
 					}else{
 						self.finalize();
 					}
 				}else{
-					UI.console.innerHTML = "Processed: " + self.accReady.length + " of " + (self.acc.length + self.accReady.length);
+					self.console.innerHTML = "Processed: " + self.accReady.length + " of " + (self.acc.length + self.accReady.length);
 				
 					if(self.acc.length >= 1){
 						setTimeout(function(){GetLatLng.getLatLng()},1000);
@@ -94,12 +96,24 @@ var GetLatLng = {
 			}
 		});
 	},
-	start : function(accounts){
+	start : function(accounts,headers,addressCols,console){
 		var theHeader = "",i,len,end,field,
-			h = [];
+			h = [],
+			g = google || false,
+			m = g.maps || false;
+		if(!this.APIKey){
+			alert("Please enter an API Key")
+			return false;
+		}
+		if(!m){
+			alert("Google Maps Service isn't loaded yet");
+			return false;
+		}
 		this.acc = accounts;
 		this.printFields = ["Latitude","Longitude"];
-		this.printFields = this.printFields.concat(UI.headers);
+		this.printFields = this.printFields.concat(headers);
+		this.addressCols = addressCols || ["Address"];
+		this.console = console || null;
 		
 		if(this.output == "CSV"){
 			theHeader = this.printFields.join(",");
@@ -110,11 +124,17 @@ var GetLatLng = {
 		this.getLatLng();
 	},
 	finalize: function(){
-		var b = null; 
-		if(self.output != "CSV"){
-			self.tBody += "\n ]";
+		if(this.output != "CSV"){
+			this.tBody += "\n ]";
 		}
-		b = new Blob([this.tBody], {type : 'text/vnd.ms-excel;charset=UTF-8'});
-		UI.onFinalize(b);
-	}
+		this.onEnd(this.tBody);
+	},
+	onEnd:function(){},
+	googleMapsLoad:function(callback,onFail){
+		var k = GetLatLng.APIKey || false,
+			callback = callback || false;
+		if(k){
+			$.getScript( "http://maps.googleapis.com/maps/api/js?key=" + k + "&callback=" + callback).fail(function(){onFail();});
+		}
+	},
 }
