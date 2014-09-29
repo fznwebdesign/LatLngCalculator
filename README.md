@@ -7,4 +7,4 @@ All you need is to save your List of Address in Excel as CSV (Comma delimited) a
 
 You can try it online [here](http://fznwebdesign.github.io/LatLngCalculator).
 
-Note: This library uses some features that may not be available on all browsers, we recommend to use the latest version of Chrome.
+Note: Some features may not be available on all browsers, we recommend the latest version of Chrome.
