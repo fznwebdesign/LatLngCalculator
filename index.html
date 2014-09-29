@@ -2,17 +2,20 @@
 <html>
 	<head>
 		<title>Lat/Lng Calculator (Google Maps Services)</title>
+		<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
 		<link href="css/style.css" media="all" rel="stylesheet" type="text/css">
 		<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 		<script type="text/javascript" src="js/UI.js"></script>
-		<script type="text/javascript" src="js/GoogleMaps_GetLatLng.js"></script>
+		<script type="text/javascript" src="js/GetLatLng.js"></script>
 	</head>
 	<body>
 		<section class="header">
 			<h1>Lat/Lng Calculator (Google Maps Services)</h1>
-			<p>Get the Lat/Lng position of an entire Address List with Google Maps Javascript API Services</p>
-			<p>All you need is to save your List of Address in Excel as CSV (Comma delimited) and your <a href="https://code.google.com/apis/console/" target="_blank">API Key</a>!</p>
-			<p>Note: Latest version of Chrome recommended</p>
+			<div id="welcomeMessage">
+				<p>Get the Lat/Lng position of an entire Address List with Google Maps Javascript API Services</p>
+				<p>All you need is to save your List of Address in Excel as CSV (Comma delimited) and your <a href="https://code.google.com/apis/console/" target="_blank">API Key</a>!</p>
+				<p>Note: Latest version of Chrome recommended</p>
+			</div>
 		</section>
 		<section id="step1">
 			<h2><span>Step 1</span> Enter your Google Maps API Key:</h2>
